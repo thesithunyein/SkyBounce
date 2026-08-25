@@ -1,0 +1,29 @@
+{
+  "name": "sky-bounce",
+  "version": "1.0.0",
+  "description": "SkyBounce — A competitive mobile coin-grabbing game for Decentraland",
+  "author": "Sithu Nyein <sithunyein.mailto@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "sdk-commands start",
+    "deploy": "sdk-commands deploy",
+    "build": "sdk-commands build",
+    "upgrade-sdk": "npm install --save-dev @dcl/sdk@latest",
+    "upgrade-sdk:next": "npm install --save-dev @dcl/sdk@next",
+    "server-logs": "sdk-commands sdk-server-logs"
+  },
+  "devDependencies": {
+    "@dcl/js-runtime": "^7.26.1-32860802198.commit-dae48fb",
+    "@dcl/sdk": "^7.26.1-32860802198.commit-dae48fb"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=6.0.0"
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true,
+    "printWidth": 120,
+    "trailingComma": "none"
+  }
+}
