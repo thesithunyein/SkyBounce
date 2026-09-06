@@ -13,9 +13,6 @@
     "email": "sithunyein.mailto@gmail.com"
   },
   "main": "bin/index.js",
-  "requiredPermissions": [
-    "MOVE_PLAYER"
-  ],
   "tags": [
     "game",
     "social",
