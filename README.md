@@ -8,6 +8,19 @@ Jump between floating sci-fi platforms, grab coins, build combos, and compete fo
 
 ---
 
+## 🖼️ In-Game Screenshots
+
+Captured live in Creator Hub preview during development — see the [`thumbnails/`](./thumbnails) folder for the full gallery:
+
+| | |
+|---|---|
+| ![SkyBounce arena](./thumbnails/6cb38c0dae1614f5.png) | ![SkyBounce build](./thumbnails/4e6e904981269112.png) |
+| ![SkyBounce scene](./thumbnails/52f50a7e74ce58f9.png) | ![SkyBounce platforms](./thumbnails/ecef14b6fc1d408f.png) |
+
+> 💡 **Judges:** the experience is live at [`anorlondo.dcl.eth`](https://decentraland.org/jump?realm=anorlondo.dcl.eth) — open it in the Decentraland Mobile App or a browser and tap to play. No video needed: the game is the demo.
+
+---
+
 ## 🎮 How to Play
 
 | Action | Desktop | Mobile |
