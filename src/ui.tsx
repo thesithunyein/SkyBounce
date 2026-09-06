@@ -417,7 +417,7 @@ function LobbyScreen() {
 
       {/* How to play */}
       <UiEntity uiTransform={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', margin: { top: 20 }, padding: { left: 28, right: 28 } }}>
-        {HowToRow('🕹️', 'JUMP onto the sci-fi towers to grab coins', GOLD)}
+        {HowToRow('🕹️', 'TAP to jump, TAP TAP to jump higher', GOLD)}
         {HowToRow('🪙', 'Bigger coins float higher — jump higher!', CYAN)}
         {HowToRow('⚡', 'Collect fast = COMBO (up to x5)', Color4.create(1, 0.55, 0.1, 1))}
         {HowToRow('👑', 'Golden sack floats at the top — climb!', GOLD)}
@@ -446,7 +446,7 @@ function LobbyScreen() {
         uiBackground={{ color: Color4.create(0.12, 0.75, 0.35, 1) }}>
         <Label value={'▶  PLAY'} fontSize={38} color={WHITE} textAlign="middle-center" />
       </UiEntity>
-      <Label value="Tap anywhere to start" fontSize={15} color={TEXT_FAINT} textAlign="middle-center" />
+      <Label value="Tap PLAY, then tap anywhere to jump" fontSize={15} color={TEXT_FAINT} textAlign="middle-center" />
 
       {state.best > 0 && (
         <Label value={'🏆 Best: ' + state.best} fontSize={20} color={GOLD} textAlign="middle-center" />

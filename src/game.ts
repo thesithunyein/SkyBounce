@@ -12,6 +12,7 @@ import {
 } from './config'
 import { state, submitScore, addQuickChat, updateRemotePlayers, setPlayersOnline, mergeServerLeaderboard, setPlayerName } from './state'
 import { spawnGoldBurst, spawnPopup, spawnRushBurst } from './fx'
+import { setupMobileControls } from './mobile-controls'
 import {
   initServer, startServerRound, endServerRound,
   clientSendScore, clientSendChat, clientSendName,
@@ -71,24 +72,8 @@ function hideEntity(e: Entity | null) {
 function rand(a: number, b: number) { return a + Math.random() * (b - a) }
 
 // ─── Touch / Mobile Controls ─────────────────────────────────────────────
-let lastTapTime = 0
-const TAP_THRESHOLD = 300
-
-function handleTouchInput() {
-  if (state.phase !== 'playing') return
-
-  if (inputSystem.isTriggered(InputAction.IA_POINTER, PointerEventType.PET_DOWN)) {
-    const now = Date.now()
-    if (now - lastTapTime < TAP_THRESHOLD) {
-      state.wantJump = true
-    }
-    lastTapTime = now
-  }
-
-  if (inputSystem.isTriggered(InputAction.IA_ACTION_3, PointerEventType.PET_DOWN)) {
-    state.wantJump = true
-  }
-}
+// Jump handled by mobile-controls.ts (single-tap jump, double-tap jump higher).
+// gameSystem keeps only tap-to-start / tap-to-restart behavior.
 
 // ─── Scene building ──────────────────────────────────────────────────────
 function buildScene() {
@@ -418,8 +403,6 @@ function gameSystem(dt: number) {
   }
 
   // Playing
-  handleTouchInput()
-
   state.timeLeft = Math.max(0, ROUND_DURATION - Math.floor((now - state.roundStart) / 1000))
   if (state.timeLeft <= 0) { endRound(); return }
 
@@ -482,6 +465,7 @@ function tickSack() {
 export function setupGame() {
   initServer()
   setupClientSync()
+  setupMobileControls()
 
   soundEnt = engine.addEntity()
   Transform.create(soundEnt, { position: Vector3.create(0, 0, 0) })

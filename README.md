@@ -66,8 +66,10 @@ SkyBounce is designed against all three: it is touch-first, its 60-second loop r
 - **Name registration** so your leaderboard entry carries your identity, with solo-graceful lobby that invites friends when you are the first one in
 
 ### Mobile-First Design
-- Tap anywhere to start, double-tap to jump
+- Tap anywhere to jump, double-tap to jump higher: the standard mobile game verb
+- Tap-to-start lobby and tap-to-restart game over
 - Large tap targets and high-contrast HUD text
+- Mid-air steering: steer onto platforms while jumping
 - Pooled particles and capped entity counts for smooth mid-range phone performance
 
 ## 🎮 How to Play
@@ -75,7 +77,8 @@ SkyBounce is designed against all three: it is touch-first, its 60-second loop r
 | Action | Desktop | Mobile |
 |--------|---------|--------|
 | Move | WASD / Arrow keys | On-screen joystick |
-| Jump | Space | Double-tap |
+| Jump | Space / click | Tap anywhere |
+| Jump higher | Space | Double-tap |
 | Start / Restart | Click | Tap screen |
 | Emote reaction | Click emote icon | Tap emote icon |
 
@@ -83,6 +86,7 @@ SkyBounce is designed against all three: it is touch-first, its 60-second loop r
 
 - ⏱️ 60 seconds per round
 - 🪙 Low coins: 10 points. High coins: 25 points
+- 👆 Tap to jump, tap twice to jump higher and steer mid-air
 - ⚡ Chain grabs within 3 seconds to build a combo, up to x5
 - 👑 Golden sack: 100 points, despawns after 8 seconds
 - 🔥 Combo x15 triggers Golden Rush: 2X score for 5 seconds
