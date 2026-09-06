@@ -32,6 +32,10 @@ Jump between floating sci-fi platforms, grab coins, build combos and race up the
 
 ![SkyBounce gameplay](./screenshots/gameplay-golden-sack.png)
 
+**Live in the Decentraland explorer**, tappable emote bar visible at the bottom:
+
+![SkyBounce live with emote bar](./screenshots/gameplay-live-emotes.png)
+
 ## 🎯 The Problem
 
 Mobile players in social virtual worlds face three recurring failures:
