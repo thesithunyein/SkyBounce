@@ -54,10 +54,12 @@ SkyBounce is designed against all three: it is touch-first, its 60-second loop r
 
 ### Multiplayer and Social
 - **Server-authoritative scoring** via Decentraland's Multiplayer Server
+- **Live scoreboard broadcast**: every player's score syncs to all clients every 2 seconds
 - **Persistent rankings** that survive server restarts through server Storage
-- **Emote bar** with 6 quick reactions: 🔥 Nice! / 😤 So close! / 🏆 gg / ⚡ Let's go! / 😂 Haha! / 👀 Watch this!
-- **Name registration** so your leaderboard entry carries your identity
-- **Live arena presence**: see and play alongside everyone in the world
+- **Tappable emote bar** with 6 quick reactions: 🔥 Nice! / 😤 So close! / 🏆 gg / ⚡ Let's go! / 😂 Haha! / 👀 Watch this! Server rate-limits spam and rebroadcasts to everyone
+- **Emote bubbles** pop above your avatar when you react
+- **Players-online counter** on the lobby and HUD
+- **Name registration** so your leaderboard entry carries your identity, with solo-graceful lobby that invites friends when you are the first one in
 
 ### Mobile-First Design
 - Tap anywhere to start, double-tap to jump
@@ -186,8 +188,9 @@ npm run deploy     # publish to your Decentraland World
 - [x] Golden Rush event with bonus coin shower
 - [x] Daily quest rotation
 - [x] Server leaderboard and persistence
-- [ ] Server-broadcast live scoreboard on the HUD
-- [ ] Cross-player emote bubbles above avatars
+- [x] Server-broadcast live scoreboard on the HUD
+- [x] Cross-player emote chat with on-screen bubbles
+- [x] Players-online counter
 - [ ] Weekly season resets with exclusive badge rewards
 
 ## 👤 Author

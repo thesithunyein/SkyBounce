@@ -3,7 +3,10 @@ import { isServer } from '@dcl/sdk/network'
 import { registerMessages, getRoom } from '@dcl/sdk/network/events'
 import { Storage } from '@dcl/sdk/server'
 import { ROUND_DURATION } from './config'
-import { AllMessages, PlayerScoreMsg, QuickChatMsg, NameRegisterMsg } from './messages'
+import {
+  AllMessages, PlayerScoreMsg, QuickChatMsg, NameRegisterMsg,
+  LiveScoresMsg, LbSyncMsg, PlayerCountMsg
+} from './messages'
 
 // ─── Types ────────────────────────────────────────────────────────────────
 interface ServerPlayer {
@@ -38,8 +41,9 @@ const MAX_LEADERBOARD = 10
 const LB_KEY = 'sky_leaderboard'
 const NAME_KEY = 'sky_names'
 const lastChat = new Map<string, number>()
+const BROADCAST_MS = 2000
 
-let room: ReturnType<typeof registerMessages> | null = null
+let room: ReturnType<typeof registerMessages<typeof AllMessages>> | null = null
 
 // ─── Persistence ──────────────────────────────────────────────────────────
 function loadLeaderboard() {
@@ -116,11 +120,46 @@ function getOrCreate(addr: string, name?: string): ServerPlayer {
   return p
 }
 
+// ─── Broadcasts (server -> all clients) ───────────────────────────────────
+function broadcastLiveScores() {
+  if (!room) return
+  const payload = []
+  for (const p of players.values()) {
+    payload.push({ n: p.name, s: p.score, ph: p.phase })
+  }
+  room.send('LiveScoresMsg', { payload: JSON.stringify(payload) })
+  room.send('PlayerCountMsg', { count: players.size })
+}
+
+function broadcastLbSync() {
+  if (!room) return
+  room.send('LbSyncMsg', { payload: JSON.stringify(leaderboard.slice(0, MAX_LEADERBOARD)) })
+}
+
 // ─── Server tick ──────────────────────────────────────────────────────────
+let lastBroadcast = 0
+let lastLbSync = 0
+
 function serverTick() {
   const now = Date.now()
+  let reaped = false
   for (const [addr, p] of players) {
-    if (now - p.lastUpdate > 30000) players.delete(addr)
+    if (now - p.lastUpdate > 30000) {
+      players.delete(addr)
+      reaped = true
+    }
+  }
+
+  // Live scores to every client every 2s
+  if (now - lastBroadcast > BROADCAST_MS) {
+    lastBroadcast = now
+    broadcastLiveScores()
+  }
+
+  // Leaderboard refresh: on changes, or every 10s so new clients sync
+  if (reaped || (now - lastLbSync > 10000)) {
+    lastLbSync = now
+    broadcastLbSync()
   }
 }
 
@@ -175,6 +214,8 @@ function onPlayerScore(senderAddress: string, data: {
       score: p.score, coins: p.coins, sacks: p.sacks,
       comboMax: p.comboMax, timestamp: Date.now()
     })
+    // Push the fresh leaderboard to everyone immediately
+    broadcastLbSync()
   }
 }
 
@@ -187,7 +228,7 @@ function onQuickChat(senderAddress: string, data: {
   if (now - last < 2000) return
   lastChat.set(senderAddress, now)
 
-  // Rebroadcast to all clients
+  // Rebroadcast to all clients (including the sender, so it renders locally too)
   if (room) {
     room.send('QuickChatMsg', {
       message: data.message,
@@ -198,9 +239,12 @@ function onQuickChat(senderAddress: string, data: {
 
 function onNameRegister(senderAddress: string, data: { name: string }) {
   if (!isServer()) return
-  const p = getOrCreate(senderAddress, data.name)
-  p.name = data.name
+  const clean = data.name.trim().slice(0, 20)
+  if (!clean) return
+  const p = getOrCreate(senderAddress, clean)
+  p.name = clean
   saveNames()
+  broadcastLbSync()
 }
 
 export function startServerRound() {
@@ -245,11 +289,31 @@ export function clientSendChat(message: string, senderName: string) {
 export function clientSendName(name: string) {
   if (isServer()) return
   const r = getRoom<typeof AllMessages>()
-  r.send('NameRegisterMsg', { name })
+  r.send('NameRegisterMsg', { name: name.trim().slice(0, 20) })
 }
 
 export function clientOnChat(callback: (data: { message: string; senderName: string }) => void) {
   if (isServer()) return () => {}
   const r = getRoom<typeof AllMessages>()
   return r.onMessage('QuickChatMsg', callback)
+}
+
+export function clientOnLiveScores(callback: (players: { n: string; s: number; ph: string }[], count: number) => void) {
+  if (isServer()) return () => {}
+  const r = getRoom<typeof AllMessages>()
+  const offScores = r.onMessage('LiveScoresMsg', (data) => {
+    try { callback(JSON.parse(data.payload), -1) } catch {}
+  })
+  const offCount = r.onMessage('PlayerCountMsg', (data) => {
+    callback([], data.count)
+  })
+  return () => { offScores(); offCount() }
+}
+
+export function clientOnLbSync(callback: (entries: LeaderboardEntry[]) => void) {
+  if (isServer()) return () => {}
+  const r = getRoom<typeof AllMessages>()
+  return r.onMessage('LbSyncMsg', (data) => {
+    try { callback(JSON.parse(data.payload)) } catch {}
+  })
 }

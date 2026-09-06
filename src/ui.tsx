@@ -4,6 +4,8 @@ import { state, setPlayerName } from './state'
 import { NEON_GOLD, NEON_CYAN, NEON_GREEN, NEON_PURPLE, NEON_PINK, ROUND_DURATION, ARENA, PLATFORMS } from './config'
 import { sendQuickChat, sendNameRegister } from './game'
 
+let lastEmoteAt = 0
+
 // ─── Palette ─────────────────────────────────────────────────────────────
 const GOLD = Color4.create(NEON_GOLD.r, NEON_GOLD.g, NEON_GOLD.b, 1)
 const CYAN = Color4.create(NEON_CYAN.r, NEON_CYAN.g, NEON_CYAN.b, 1)
@@ -134,6 +136,38 @@ function Hud() {
       {/* Quick Chat Bar — bottom */}
       <EmoteBar />
 
+      {/* Live chat log — left side */}
+      <ChatLog />
+
+      {/* Emote bubble above avatar */}
+      <EmoteBubble />
+
+      {/* Players online — under coins */}
+      {state.playersOnline > 0 && (
+        <UiEntity
+          uiTransform={{
+            positionType: 'absolute',
+            position: { top: '9%', right: '2%' },
+            padding: '6px 14px',
+            display: 'flex', alignItems: 'center'
+          }}
+          uiBackground={{ color: PANEL }}>
+          <Label
+            value={'👥 ' + state.playersOnline + ' online'}
+            fontSize={16} color={GREEN} textAlign="middle-center" />
+        </UiEntity>
+      )}
+
+      {/* Golden Rush screen flash */}
+      {Date.now() < state.rushFlashUntil && (
+        <UiEntity
+          uiTransform={{
+            positionType: 'absolute', position: { top: 0, left: 0 },
+            width: '100vw', height: '100vh'
+          }}
+          uiBackground={{ color: Color4.create(1, 0.85, 0.2, 0.35) }} />
+      )}
+
       {/* Remote player scores — right side */}
       <RemoteScores />
 
@@ -143,7 +177,7 @@ function Hud() {
   )
 }
 
-// ─── Emote Bar ───────────────────────────────────────────────────────────
+// ─── Emote Bar (now tappable!) ─────────────────────────────────────
 function EmoteBar() {
   if (state.phase !== 'playing') return null
 
@@ -155,16 +189,66 @@ function EmoteBar() {
         display: 'flex', flexDirection: 'row'
       }}>
       {EMOTES.map((em, i) => (
-        <UiEntity
+        <Button
           key={'emote-' + i}
-          uiTransform={{
-            padding: '8px 12px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          value={em.icon}
+          fontSize={22}
+          color={WHITE}
+          uiTransform={{ padding: '8px 12px' }}
+          uiBackground={{ color: PANEL_LIGHT }}
+          onMouseDown={() => {
+            const now = Date.now()
+            if (now - lastEmoteAt < 2000) return // anti-spam, matches server
+            lastEmoteAt = now
+            sendQuickChat(em.text)
           }}
-          uiBackground={{ color: PANEL_LIGHT }}>
-          <Label value={em.icon} fontSize={22} textAlign="middle-center" />
+        />
+      ))}
+    </UiEntity>
+  )
+}
+
+// ─── Live Chat Log ──────────────────────────────────────────────────
+function ChatLog() {
+  if (state.phase !== 'playing') return null
+  const now = Date.now()
+  const visible = state.quickChatLog.filter(m => m.until > now)
+  if (visible.length === 0) return null
+
+  return (
+    <UiEntity
+      uiTransform={{
+        positionType: 'absolute',
+        position: { top: '22%', left: '2%' },
+        display: 'flex', flexDirection: 'column', alignItems: 'flex-start'
+      }}>
+      {visible.map((m, i) => (
+        <UiEntity
+          key={'chat-' + i + '-' + m.until}
+          uiTransform={{ padding: '5px 12px', margin: { bottom: 4 } }}
+          uiBackground={{ color: PANEL }}>
+          <Label value={m.name + ': ' + m.message} fontSize={15} color={WHITE} textAlign="middle-left" />
         </UiEntity>
       ))}
+    </UiEntity>
+  )
+}
+
+// ─── Emote Bubble (above avatar) ────────────────────────────────────
+function EmoteBubble() {
+  if (state.phase !== 'playing') return null
+  if (Date.now() > state.emoteBubbleUntil) return null
+
+  return (
+    <UiEntity
+      uiTransform={{
+        positionType: 'absolute',
+        position: { bottom: '30%', left: '30%' },
+        width: '40vw', padding: '10px 0',
+        display: 'flex', alignItems: 'center', justifyContent: 'center'
+      }}
+      uiBackground={{ color: Color4.create(0.1, 0.55, 0.9, 0.92) }}>
+      <Label value={state.emoteBubble} fontSize={18} color={WHITE} textAlign="middle-center" />
     </UiEntity>
   )
 }
@@ -236,7 +320,7 @@ function CountdownOverlay() {
   )
 }
 
-// ─── Name Input Modal ────────────────────────────────────────────────────
+// ─── Name Input Modal (now functional!) ─────────────────────────────
 function NameModal() {
   if (!state.showNameInput) return null
 
@@ -261,19 +345,26 @@ function NameModal() {
           placeholder="Your name..."
           value={state.nameInput}
           onChange={(v) => { state.nameInput = v }}
+          onSubmit={(v) => {
+            sendNameRegister(v || state.nameInput)
+            state.showNameInput = false
+          }}
           uiTransform={{ width: 280, height: 44 }}
           uiBackground={{ color: Color4.create(0.08, 0.06, 0.18, 1) }}
           color={WHITE}
           fontSize={20}
         />
-        <UiEntity
-          uiTransform={{
-            padding: '14px 40px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
+        <Button
+          value="▶  CONFIRM"
+          fontSize={24}
+          color={WHITE}
+          uiTransform={{ padding: '14px 40px', margin: { top: 12 } }}
+          uiBackground={{ color: Color4.create(0.12, 0.75, 0.35, 1) }}
+          onMouseDown={() => {
+            sendNameRegister(state.nameInput)
+            state.showNameInput = false
           }}
-          uiBackground={{ color: Color4.create(0.12, 0.75, 0.35, 1) }}>
-          <Label value="▶  CONFIRM" fontSize={24} color={WHITE} textAlign="middle-center" />
-        </UiEntity>
+        />
       </UiEntity>
     </UiEntity>
   )
@@ -303,7 +394,26 @@ function LobbyScreen() {
       uiBackground={{ color: Color4.create(0.02, 0.015, 0.06, 0.92) }}>
       <Label value="🪙 SKY BOUNCE ⛰️" fontSize={56} color={CYAN} textAlign="middle-center" />
       <Label value="Jump & grab coins in the sky!" fontSize={22} color={TEXT_DIM} textAlign="middle-center" />
-      <Label value={'Playing as: ' + state.playerName} fontSize={16} color={TEXT_FAINT} textAlign="middle-center" />
+
+      {/* Players online / solo-graceful nudge */}
+      {state.playersOnline > 1 ? (
+        <Label value={'👥 ' + state.playersOnline + ' players online now'} fontSize={18} color={GREEN} textAlign="middle-center" />
+      ) : (
+        <Label value="🌅 You're the first one here — invite a friend to race!" fontSize={17} color={TEXT_FAINT} textAlign="middle-center" />
+      )}
+
+      {/* Tap to set name (opens the name modal) */}
+      <Button
+        value={'👤 Playing as: ' + state.playerName + '  (tap to change)'}
+        fontSize={16}
+        color={CYAN}
+        uiTransform={{ margin: { top: 6 }, padding: '6px 18px' }}
+        uiBackground={{ color: PANEL_LIGHT }}
+        onMouseDown={() => {
+          state.nameInput = state.playerName === 'Player' ? '' : state.playerName
+          state.showNameInput = true
+        }}
+      />
 
       {/* How to play */}
       <UiEntity uiTransform={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', margin: { top: 20 }, padding: { left: 28, right: 28 } }}>

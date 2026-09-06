@@ -10,11 +10,12 @@ import {
   COMBO_WINDOW_MS, PLATFORMS, CAMPFIRE, NEON_GOLD, WARM,
   RUSH_THRESHOLD, RUSH_DURATION_MS
 } from './config'
-import { state, submitScore } from './state'
+import { state, submitScore, addQuickChat, updateRemotePlayers, setPlayersOnline, mergeServerLeaderboard, setPlayerName } from './state'
 import { spawnGoldBurst, spawnPopup, spawnRushBurst } from './fx'
 import {
   initServer, startServerRound, endServerRound,
-  clientSendScore, clientSendChat, clientSendName
+  clientSendScore, clientSendChat, clientSendName,
+  clientOnChat, clientOnLiveScores, clientOnLbSync
 } from './server'
 
 // ─── Coin entities ───────────────────────────────────────────────────────
@@ -213,7 +214,9 @@ function collectCoin(c: Coin) {
 function triggerGoldenRush() {
   state.rushActive = true
   state.rushEnd = Date.now() + RUSH_DURATION_MS
+  state.rushFlashUntil = Date.now() + 700
   playSound('sounds/coin.wav')
+  playSound('sounds/sack.wav') // big fanfare
 
   spawnRushBurst({ x: ARENA.centerX, y: 2, z: ARENA.centerZ })
   spawnPopup(
@@ -293,11 +296,37 @@ function broadcastScore() {
 }
 
 export function sendQuickChat(message: string) {
-  clientSendChat(message, state.playerName)
+  addQuickChat(state.playerName, message) // instant local bubble
+  clientSendChat(message, state.playerName) // server rebroadcasts to everyone
 }
 
 export function sendNameRegister(name: string) {
-  clientSendName(name)
+  const clean = name.trim().slice(0, 20)
+  if (!clean) return
+  setPlayerName(clean)
+  clientSendName(clean)
+}
+
+// ─── Client listeners: live scores, chat, leaderboard sync ──────────────
+function setupClientSync() {
+  if (isServer()) return
+
+  clientOnChat((data) => {
+    addQuickChat(data.senderName, data.message)
+  })
+
+  clientOnLiveScores((players, count) => {
+    if (players.length > 0) {
+      updateRemotePlayers(players.map(p => ({
+        name: p.n, score: p.s, phase: p.ph
+      })))
+    }
+    if (count >= 0) setPlayersOnline(count)
+  })
+
+  clientOnLbSync((entries) => {
+    mergeServerLeaderboard(entries)
+  })
 }
 
 // ─── Round control ───────────────────────────────────────────────────────
@@ -350,6 +379,13 @@ function endRound() {
   submitScore(state.playerName)
   endServerRound('')
   broadcastScore()
+
+  // Beat-the-leader toast: how far from #1 on the server board?
+  const top = state.leaderboard[0]
+  if (top && top.name !== state.playerName && state.score < top.score && state.score > 0) {
+    state.lastToast = '🎯 ' + top.name + ' leads with ' + top.score + '. ' + (top.score - state.score) + ' to beat!'
+    state.toastUntil = Date.now() + 6000
+  }
 }
 
 // ─── Main system ─────────────────────────────────────────────────────────
@@ -445,6 +481,7 @@ function tickSack() {
 // ─── Setup ───────────────────────────────────────────────────────────────
 export function setupGame() {
   initServer()
+  setupClientSync()
 
   soundEnt = engine.addEntity()
   Transform.create(soundEnt, { position: Vector3.create(0, 0, 0) })

@@ -54,6 +54,21 @@ export const LbEntrySchema = Schemas.Map({
   timestamp: Schemas.Int
 })
 
+// ─── Server Broadcasts (server -> all clients) ───────────────────────────
+// payload is a JSON string: [{ n: name, s: score, ph: phase }]
+export const LiveScoresMsg = Schemas.Map({
+  payload: Schemas.String
+})
+
+// payload is a JSON string: LbEntry[] (all-time top 10)
+export const LbSyncMsg = Schemas.Map({
+  payload: Schemas.String
+})
+
+export const PlayerCountMsg = Schemas.Map({
+  count: Schemas.Int
+})
+
 // ─── All messages registry ────────────────────────────────────────────────
 export const AllMessages = {
   PlayerScoreMsg,
@@ -62,5 +77,8 @@ export const AllMessages = {
   RoundEndMsg,
   GoldenRushMsg,
   NameRegisterMsg,
-  LbEntrySchema
+  LbEntrySchema,
+  LiveScoresMsg,
+  LbSyncMsg,
+  PlayerCountMsg
 }

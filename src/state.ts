@@ -102,14 +102,22 @@ export const state = {
   lastBeat: '',
   leaderboard: loadLeaderboard() as LbEntry[],
 
-  // Remote players (other players' scores shown on HUD)
+  // Remote players (other players' live scores from the server)
   remotePlayers: [] as {
-    name: string; score: number; coins: number;
-    combo: number; phase: string; timeLeft: number
+    name: string; score: number; coins?: number;
+    combo?: number; phase: string; timeLeft?: number
   }[],
 
   // Quick chat
   quickChatLog: [] as { name: string; message: string; until: number }[],
+
+  // Emote bubble above avatar
+  emoteBubble: '' as string,
+  emoteBubbleUntil: 0 as number,
+
+  // Live server sync
+  playersOnline: 0,
+  rushFlashUntil: 0 as number,
 
   // Daily quest
   quest: todaysQuest() as DailyQuest,
@@ -175,12 +183,48 @@ export function submitScore(name: string) {
 }
 
 export function addQuickChat(name: string, message: string) {
-  state.quickChatLog.push({ name, message, until: Date.now() + 5000 })
-  if (state.quickChatLog.length > 5) state.quickChatLog.shift()
+  state.quickChatLog.push({ name, message, until: Date.now() + 6000 })
+  if (state.quickChatLog.length > 4) state.quickChatLog.shift()
+
+  // Also show as an emote bubble above the avatar
+  state.emoteBubble = name + ': ' + message
+  state.emoteBubbleUntil = Date.now() + 4000
 }
 
-export function updateRemotePlayers(players: typeof state.remotePlayers) {
+export function updateRemotePlayers(players: { name: string; score: number; phase: string }[]) {
   state.remotePlayers = players
+  // Server payload includes every player, so its length is the online count
+  if (players.length > 0) state.playersOnline = players.length
+}
+
+export function setPlayersOnline(count: number) {
+  if (count >= 0) state.playersOnline = count
+}
+
+// ─── Server leaderboard sync ───────────────────────────────────────────
+export function mergeServerLeaderboard(entries: {
+  address: string; name: string; score: number
+}[]) {
+  if (!entries || entries.length === 0) return
+  const map = new Map<string, LbEntry>()
+  for (const e of state.leaderboard) map.set(e.address, e)
+  for (const e of entries) {
+    const existing = map.get(e.address)
+    if (!existing || e.score > existing.score) {
+      map.set(e.address, {
+        address: e.address,
+        name: e.name,
+        score: e.score,
+        coins: (existing && existing.address === e.address) ? existing.coins : 0,
+        sacks: (existing && existing.address === e.address) ? existing.sacks : 0,
+        comboMax: (existing && existing.address === e.address) ? existing.comboMax : 0,
+        timestamp: (existing && existing.address === e.address) ? existing.timestamp : 0
+      })
+    }
+  }
+  const merged = [...map.values()].sort((a, b) => b.score - a.score).slice(0, 10)
+  state.leaderboard = merged
+  saveLeaderboard(merged)
 }
 
 export function setPlayerName(name: string) {
