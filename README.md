@@ -4,7 +4,7 @@
 
 Jump between floating sci-fi platforms, grab coins, build combos, and compete for the top of the global leaderboard — all optimized for mobile touch controls.
 
-🔗 **Play now:** [Decentraland World](https://play.decentraland.org/?realm=https://sdk-team-content.decentraland.org/ipfs/QmSkyBounce)
+🔗 **Play now:** [anorlondo.dcl.eth](https://decentraland.org/jump?realm=anorlondo.dcl.eth) — live in the Decentraland Mobile App and web browser
 
 ---
 
@@ -36,15 +36,15 @@ Jump between floating sci-fi platforms, grab coins, build combos, and compete fo
 - Performance-optimized for mid-range devices
 
 ### Competitive Multiplayer
-- **Global leaderboard** powered by Decentraland's Multiplayer Server
-- Real-time score sync between all players in the world
+- **Server-authoritative scoring** powered by Decentraland's Multiplayer Server
+- Scores validated server-side — no cheating
 - Persistent rankings that survive server restarts
-- See other players' live scores on your HUD
+- Live cross-player score sync — coming in the next update
 
 ### Social Features
-- **Quick Chat emotes** — tap to send reactions to nearby players
-- 🔥 Nice! / 😤 So close! / 🏆 gg / ⚡ Let's go! / 😂 Haha! / 👀 Watch this!
-- Voice chat enabled for deeper interaction
+- **Emote bar** with 6 quick reactions: 🔥 Nice! / 😤 So close! / 🏆 gg / ⚡ Let's go! / 😂 Haha! / 👀 Watch this!
+- Multiplayer message bus wired for cross-player chat and name registration
+- Live avatar presence — see and play alongside other players in the arena
 
 ### Game Mechanics
 - **Combo system** — fast collection = higher multiplier (up to x5)
@@ -89,7 +89,7 @@ Jump between floating sci-fi platforms, grab coins, build combos, and compete fo
 | Criterion | How SkyBounce Delivers |
 |-----------|----------------------|
 | **Mobile-First** | Built for touch from the ground up, not adapted from desktop |
-| **Social Value** | Global leaderboard, quick chat emotes, voice chat, competitive scoring |
+| **Social Value** | Server-side scoring, emote reactions, shared arena presence, competitive loop |
 | **Mobile UX** | Large tap targets, readable text, intuitive controls |
 | **Performance** | Entity pooling, optimized particles, tested for mid-range devices |
 | **Creativity** | Golden Rush mechanic, combo multiplier, moving platform timing |
@@ -143,8 +143,8 @@ The leaderboard is powered by Decentraland's Multiplayer Server:
 
 1. **Server-authoritative** — scores validated server-side, no cheating
 2. **Persistent** — survives server restarts via Storage API
-3. **Global** — all players in the world see the same rankings
-4. **Real-time** — scores sync every 2 seconds during gameplay
+3. **Broadcast-ready** — server rebroadcasts chat events to every client
+4. **Instant feedback** — local leaderboard UI updates the moment a round ends
 
 ---
 

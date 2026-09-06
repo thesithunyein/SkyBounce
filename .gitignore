@@ -18,6 +18,8 @@ Thumbs.db
 
 # Decentraland
 .dclcontext/
+dclcontext/
+.editor/
 *.crdt
 
 # Logs
