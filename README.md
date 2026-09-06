@@ -8,9 +8,13 @@ Jump between floating sci-fi platforms, grab coins, build combos, and compete fo
 
 ---
 
-## 🖼️ In-Game Screenshot
+## 🖼️ In-Game Screenshots
 
-Real gameplay — golden sack event live, neon platforms, coin rings, and the game HUD:
+**Lobby** — onboarding, how-to-play, daily quest, and leaderboard preview:
+
+![SkyBounce lobby](./screenshots/lobby.png)
+
+**Gameplay** — golden sack event live, neon platforms, coin rings, and the HUD:
 
 ![SkyBounce gameplay — golden sack event](./screenshots/gameplay-golden-sack.png)
 
